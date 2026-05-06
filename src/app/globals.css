@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --canvas: #0B0C17;
+  --surface: #12131F;
+  --card: #181928;
+  --border: #252640;
+  --muted: #3A3C5E;
+  --faint: #555778;
+  --sub: #8A8CB0;
+  --text: #E8E9FF;
+  --ink: #5B5EF5;
+  --ink-light: #7585fd;
+  --coral: #FF6B6B;
+  --lime: #C6F135;
+  --amber: #FFB347;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--faint); }
+
+/* Selection */
+::selection { background: rgba(91,94,245,0.35); color: #fff; }
+
+@layer utilities {
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(90deg, var(--card) 25%, #1f2035 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  /* Glass morphism card */
+  .glass {
+    background: rgba(24, 25, 40, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Noise texture overlay */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+    border-radius: inherit;
+  }
+
+  /* Glowing border */
+  .glow-border {
+    border: 1px solid rgba(91,94,245,0.35);
+    box-shadow: 0 0 0 1px rgba(91,94,245,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* Tag pill */
+  .tag {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-mono;
+  }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm text-text placeholder-faint 
+    focus:outline-none focus:border-ink-500 focus:ring-2 focus:ring-ink-500/20 transition-all duration-200
+    font-body;
+  }
+
+  /* Button primary */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-ink-500 hover:bg-ink-400 
+    active:bg-ink-700 text-white text-sm font-semibold font-display rounded-xl 
+    transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+    shadow-ink hover:shadow-ink-lg;
+  }
+
+  /* Button ghost */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 
+    text-sub hover:text-text border border-border hover:border-muted 
+    text-sm font-medium rounded-xl transition-all duration-150;
+  }
+
+  /* Button danger */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 
+    bg-coral-500/10 text-coral-400 border border-coral-500/25 hover:bg-coral-500/20
+    text-sm font-semibold rounded-xl transition-all duration-150;
+  }
+
+  /* Button success */
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 
+    bg-lime-400/10 text-lime-400 border border-lime-400/25 hover:bg-lime-400/20
+    text-sm font-semibold rounded-xl transition-all duration-150;
+  }
+}
+
+/* Stagger animation delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Animated grid background */
+.bg-grid {
+  background-image: 
+    linear-gradient(rgba(37, 38, 64, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 38, 64, 0.5) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Orb glow effects */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Table row hover */
+tbody tr:hover td { background: rgba(91,94,245,0.04); }

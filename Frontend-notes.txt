@@ -1,0 +1,273 @@
+====================================================
+  BroadcastED — Frontend Notes
+  Content Broadcasting System
+  Made by: Janvi
+====================================================
+
+─────────────────────────────────────────
+1. PROJECT STRUCTURE
+─────────────────────────────────────────
+
+src/
+├── app/
+│   ├── auth/page.js               # Login page (public)
+│   ├── teacher/
+│   │   ├── layout.js              # Protected teacher shell
+│   │   ├── dashboard/page.js      # Stats + recent content
+│   │   ├── upload/page.js         # Upload with validation
+│   │   └── my-content/page.js     # All teacher content + status
+│   ├── principal/
+│   │   ├── layout.js              # Protected principal shell
+│   │   ├── dashboard/page.js      # Stats + pending table
+│   │   ├── approvals/page.js      # Approve / Reject cards
+│   │   └── content/page.js        # All content, search, filter, paginate
+│   ├── live/[teacherId]/page.js   # Public broadcast page (no auth)
+│   ├── globals.css
+│   ├── layout.js                  # Root providers + toaster
+│   └── page.js                    # Role-based root redirect
+│
+├── components/
+│   ├── shared/
+│   │   ├── ContentCard.js         # Reusable content card (title, subject, file
+│   │   │                            preview, status badge, schedule badge,
+│   │   │                            teacher avatar, rejection reason)
+│   │   ├── EmptyState.js          # Consistent empty state with icon + CTA
+│   │   ├── Modal.js               # Accessible modal (backdrop, escape close)
+│   │   ├── PageHeader.js          # Eyebrow + title + subtitle + actions slot
+│   │   ├── ProtectedRoute.js      # Auth gate + role-based redirect
+│   │   ├── Sidebar.js             # Role-aware nav + user badge + logout
+│   │   ├── Skeleton.js            # ContentCardSkeleton + TableRowSkeleton
+│   │   ├── StatsCard.js           # Metric card with icon + theme color
+│   │   └── StatusBadge.js         # StatusBadge + SchedBadge
+│   └── principal/
+│       └── RejectModal.js         # Rejection form with required reason field
+│
+├── services/                      # ← ALL API calls live here
+│   ├── auth.service.js            # login(), logout(), getCurrentUser(), getToken()
+│   ├── content.service.js         # getAllContent(), getTeacherContent(),
+│   │                                getLiveContent(), uploadContent(),
+│   │                                getPendingContent(), getContentStats()
+│   └── approval.service.js        # approveContent(), rejectContent()
+│
+├── hooks/
+│   ├── useContent.js              # useContentStats, useTeacherContent,
+│   │                                usePendingContent, useAllContent, useLiveContent
+│   └── useDebounce.js             # Input debounce (350ms default)
+│
+├── context/
+│   └── AuthContext.js             # Global auth state (user, login, logout)
+│
+├── lib/
+│   ├── apiClient.js               # Base fetch wrapper — auto-attaches JWT
+│   └── mockData.js                # Seed data (42 items), MOCK_USERS, SUBJECTS
+│
+└── utils/
+    └── helpers.js                 # cn(), fmt(), fmtDT(), fmtSize(),
+                                     scheduleStatus(), STATUS, SCHED, cut()
+
+
+─────────────────────────────────────────
+2. AUTHENTICATION FLOW
+─────────────────────────────────────────
+
+1. Root page.js checks AuthContext on mount
+2. If no user → redirect /auth
+3. /auth: react-hook-form + Zod validates email (format) + password (required)
+4. On submit → auth.service.login(email, password)
+   - Mock: match MOCK_USERS array, throw on mismatch
+   - Real: POST /api/auth/login → { user, token }
+5. Token stored: localStorage('auth_token')
+   User stored: localStorage('auth_user')
+6. AuthContext hydrates from localStorage on initial mount
+7. Redirect based on user.role:
+   teacher   → /teacher/dashboard
+   principal → /principal/dashboard
+8. Logout: clears both localStorage keys → /auth
+
+Demo accounts:
+  teacher@demo.com   / password  (Teacher: Sarah Johnson)
+  teacher2@demo.com  / password  (Teacher: Michael Chen)
+  principal@demo.com / password  (Principal: Dr. Amanda Lee)
+
+
+─────────────────────────────────────────
+3. ROLE-BASED ROUTING
+─────────────────────────────────────────
+
+Every teacher/* and principal/* layout wraps children in
+<ProtectedRoute role="teacher|principal">.
+
+ProtectedRoute logic:
+  - No user      → replace('/auth')
+  - Wrong role   → replace('/<actual-role>/dashboard')
+  - Correct role → render children
+
+/live/:teacherId is fully public — no ProtectedRoute.
+
+Valid live page IDs in mock mode:
+  /live/teacher-1   (Sarah Johnson)
+  /live/teacher-2   (Michael Chen)
+
+
+─────────────────────────────────────────
+4. API INTEGRATION APPROACH
+─────────────────────────────────────────
+
+Component ──→ Hook ──→ Service ──→ API
+
+RULES (enforced throughout):
+  ✗ No fetch/axios calls inside components
+  ✗ No mock data accessed inside components
+  ✓ Components call hooks only
+  ✓ Hooks call service functions only
+  ✓ Services contain all API logic
+
+Each service method has a clear comment block:
+  // Real → PATCH /api/content/:id/approve
+
+Swapping mock→real requires editing only
+src/services/*.service.js. Set:
+  NEXT_PUBLIC_API_URL=https://your-api.com
+in .env.local.
+
+apiClient.js automatically attaches:
+  Authorization: Bearer <token from localStorage>
+to every request.
+
+
+─────────────────────────────────────────
+5. STATE MANAGEMENT APPROACH
+─────────────────────────────────────────
+
+No Redux / Zustand. State at the right level:
+
+  AuthContext    → global user identity
+  Custom hooks   → async server state per page
+                   (loading, data, error, refetch)
+  useState       → UI state (modals, filters, tabs, pagination)
+
+useAsync() — base hook inside useContent.js wraps any
+async function with { data, loading, error, refetch }.
+
+useLiveContent polls every 30 seconds via setInterval
+(cleanup on unmount).
+
+Search input is debounced 350ms (useDebounce) to avoid
+excessive service calls while typing.
+
+useMemo used for client-side list filtering (tabs).
+useCallback used for approve/reject handlers.
+
+
+─────────────────────────────────────────
+6. FORM HANDLING & VALIDATION
+─────────────────────────────────────────
+
+Forms: react-hook-form + Zod (@hookform/resolvers)
+
+Auth form schema:
+  email    — required, valid format
+  password — required
+
+Upload form schema:
+  title             — required, max 100 chars
+  subject           — required (dropdown from SUBJECTS)
+  description       — optional
+  startTime         — required datetime
+  endTime           — required datetime, must > startTime (cross-field refine)
+  rotationDuration  — optional, coerce number, 5–300 seconds
+
+File validation (manual, not Zod — File not serializable):
+  Allowed types : image/jpeg, image/png, image/gif
+  Max size      : 10 MB (10 * 1024 * 1024 bytes)
+
+Rejection modal:
+  reason — required, non-empty string, checked before API call
+
+
+─────────────────────────────────────────
+7. UI / UX DETAILS
+─────────────────────────────────────────
+
+Design language: dark, editorial, precise
+  Fonts: Syne (display) + Outfit (body) + JetBrains Mono (labels)
+  Colors: canvas (#0B0C17) · surface · card · ink-500 (#5B5EF5)
+          coral (#FF6B6B) · lime (#C6F135) · amber (#FFB347)
+
+Components:
+  ✓ Sidebar with active state indicators
+  ✓ Stats dashboard cards (4 per role)
+  ✓ Content cards with image preview
+  ✓ Content tables with thumbnails
+  ✓ Modals (approve preview, reject with reason)
+  ✓ Toasts (react-hot-toast)
+  ✓ Skeleton loaders (ContentCardSkeleton, TableRowSkeleton)
+  ✓ Empty states with icon + CTA
+  ✓ Status badges (pending/approved/rejected)
+  ✓ Schedule badges (scheduled/active/expired)
+  ✓ Drag-and-drop file upload with preview
+  ✓ Filter tabs with count badges
+  ✓ Search input with debounce
+  ✓ Status select filter
+  ✓ Pagination with prev/next
+  ✓ Responsive grid (1→2→3 col)
+  ✓ Loading states on every async action
+
+
+─────────────────────────────────────────
+8. PERFORMANCE
+─────────────────────────────────────────
+
+  ✓ Images use loading="lazy"
+  ✓ File object URL revoked on clear (no memory leaks)
+  ✓ Search debounced 350ms
+  ✓ Pagination: 15 items per page
+  ✓ useCallback on refetch + approval handlers
+  ✓ useMemo on filtered content lists
+  ✓ Stagger CSS animations (no JS)
+  ✓ CSS-only shimmer skeletons
+
+
+─────────────────────────────────────────
+9. EDGE CASE HANDLING
+─────────────────────────────────────────
+
+  ✓ Empty data      — EmptyState component on all lists
+  ✓ API errors      — error state rendered inline
+  ✓ Slow responses  — loading skeletons
+  ✓ Invalid login   — toast with error message
+  ✓ Upload failure  — toast + form remains populated
+  ✓ Invalid file    — inline error (type + size)
+  ✓ Rejection w/o reason — blocked UI + inline error
+  ✓ Broken API resp — safe optional chaining throughout
+  ✓ Wrong role      — ProtectedRoute redirects
+
+
+─────────────────────────────────────────
+10. ASSUMPTIONS
+─────────────────────────────────────────
+
+  - File upload stores preview URL (object URL) in mock.
+    In production: use multipart/form-data or pre-signed S3.
+  - Mock data resets on full browser refresh (in-memory only).
+  - Token is a simple string in mock. Production: use
+    httpOnly cookies or refresh token rotation.
+  - Live page polls every 30s. Interval configurable in
+    hooks/useContent.js → useLiveContent.
+  - Schedule status (scheduled/active/expired) is computed
+    client-side from startTime/endTime fields.
+
+
+─────────────────────────────────────────
+11. SETUP
+─────────────────────────────────────────
+
+  npm install
+  npm run dev
+  → http://localhost:3000
+
+  Public live page (no login):
+  → http://localhost:3000/live/teacher-1
+  → http://localhost:3000/live/teacher-2
+
+====================================================

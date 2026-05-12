@@ -8,16 +8,16 @@ A full-featured educational content broadcasting platform built with **Next.js 1
 
 ## ✨ Features
 
-| Area | Details |
-|---|---|
-| **Auth** | Login with Zod validation, role-based redirect, demo credential buttons |
-| **Teacher Dashboard** | Stats cards, recent content grid, upload shortcut |
-| **Upload Content** | Drag & drop, file preview, type/size validation (JPG/PNG/GIF, max 10MB), scheduling fields, rotation duration |
-| **My Content** | Filter tabs (all/pending/approved/rejected) with counts, rejection reason display |
-| **Principal Dashboard** | Stats + pending content table with thumbnails |
-| **Approvals** | Approve/reject cards, full preview modal, mandatory rejection reason modal |
-| **All Content** | Search, status filter, pagination (15/page), schedule status badges |
-| **Live Page** | `/live/:teacherId` — public, no auth, auto-polls every 30s, featured broadcast layout |
+| Area                    | Details                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Auth**                | Login with Zod validation, role-based redirect, demo credential buttons                                       |
+| **Teacher Dashboard**   | Stats cards, recent content grid, upload shortcut                                                             |
+| **Upload Content**      | Drag & drop, file preview, type/size validation (JPG/PNG/GIF, max 10MB), scheduling fields, rotation duration |
+| **My Content**          | Filter tabs (all/pending/approved/rejected) with counts, rejection reason display                             |
+| **Principal Dashboard** | Stats + pending content table with thumbnails                                                                 |
+| **Approvals**           | Approve/reject cards, full preview modal, mandatory rejection reason modal                                    |
+| **All Content**         | Search, status filter, pagination (15/page), schedule status badges                                           |
+| **Live Page**           | `/live/:teacherId` — public, no auth, auto-polls every 30s, featured broadcast layout                         |
 
 ---
 
@@ -36,10 +36,10 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ## 🔑 Demo Credentials
 
-| Role | Email | Password |
-|---|---|---|
-| Teacher | `teacher@demo.com` | `password` |
-| Teacher 2 | `teacher2@demo.com` | `password` |
+| Role      | Email                | Password   |
+| --------- | -------------------- | ---------- |
+| Teacher   | `teacher@demo.com`   | `password` |
+| Teacher 2 | `teacher2@demo.com`  | `password` |
 | Principal | `principal@demo.com` | `password` |
 
 ---
@@ -88,7 +88,7 @@ All API logic is isolated in `src/services/`. Each method has a comment showing 
 // In content.service.js:
 // Real → GET /api/content?status=&search=
 // Replace mock block with:
-return apiClient.get('/api/content', { status, search });
+return apiClient.get("/api/content", { status, search });
 ```
 
 Set your API base URL in `.env.local`:
@@ -115,26 +115,26 @@ The `apiClient.js` automatically attaches `Authorization: Bearer <token>` to eve
 
 ## 📋 Assignment Coverage
 
-| Requirement | Status |
-|---|---|
-| Authentication + role redirect | ✅ |
-| Teacher: dashboard, upload, my-content | ✅ |
-| Principal: dashboard, approvals, all-content | ✅ |
-| Upload validation (type, size, end > start) | ✅ |
-| Approval workflow with rejection reason modal | ✅ |
-| Live broadcast page `/live/:teacherId` | ✅ |
-| Scheduling fields (start, end, rotation) | ✅ |
-| Schedule status (scheduled/active/expired) | ✅ |
-| Service layer (no API calls in components) | ✅ |
-| Loading / Error / Empty states | ✅ |
-| Skeleton loaders | ✅ |
-| Toasts | ✅ |
-| Search + filter + pagination | ✅ |
-| Auto-polling (30s) on live page | ✅ |
-| File preview before upload | ✅ |
-| Drag & drop upload | ✅ |
-| Responsive layout | ✅ |
-| Frontend-notes.txt documentation | ✅ |
+| Requirement                                   | Status |
+| --------------------------------------------- | ------ |
+| Authentication + role redirect                | ✅     |
+| Teacher: dashboard, upload, my-content        | ✅     |
+| Principal: dashboard, approvals, all-content  | ✅     |
+| Upload validation (type, size, end > start)   | ✅     |
+| Approval workflow with rejection reason modal | ✅     |
+| Live broadcast page `/live/:teacherId`        | ✅     |
+| Scheduling fields (start, end, rotation)      | ✅     |
+| Schedule status (scheduled/active/expired)    | ✅     |
+| Service layer (no API calls in components)    | ✅     |
+| Loading / Error / Empty states                | ✅     |
+| Skeleton loaders                              | ✅     |
+| Toasts                                        | ✅     |
+| Search + filter + pagination                  | ✅     |
+| Auto-polling (30s) on live page               | ✅     |
+| File preview before upload                    | ✅     |
+| Drag & drop upload                            | ✅     |
+| Responsive layout                             | ✅     |
+| Frontend-notes.txt documentation              | ✅     |
 
 ---
 
@@ -144,4 +144,4 @@ See `Frontend-notes.txt` for detailed notes on architecture, auth flow, state ma
 
 ---
 
-> Made by **Janvi** · BroadcastED © 2024
+> Made by **Janvi** · BroadcastED © 2026
